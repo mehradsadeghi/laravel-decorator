@@ -1,0 +1,52 @@
+{
+  "name": "mehradsadeghi/laravel-decorator",
+  "description": "Decorate and extend functionalities of methods without causing any break to the existing codebase.",
+  "keywords": [
+    "decorator",
+    "laravel-decorator",
+    "decoration",
+    "decorator-pattern"
+  ],
+  "homepage": "https://github.com/mehradsadeghi/laravel-decorator",
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Mehrad Sadeghi",
+      "email": "mehrad177@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "laravel/framework": "5.*|6.*|7.*"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^4.0"
+  },
+  "autoload": {
+    "files": [
+      "src/helpers.php"
+    ],
+    "psr-4": {
+      "Mehradsadeghi\\Decorator\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Mehradsadeghi\\DecoratorTest\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Mehradsadeghi\\Decorator\\DecoratorServiceProvider"
+      ]
+    }
+  }
+}
