@@ -8,27 +8,28 @@ class ExampleTest extends TestCase
 {
     public function testBasicTest()
     {
-        decorateWith([UserRepo::class, 'getUsers'], function($callable) {
-            return function($params) use ($callable) {
 
-                $params[0] = true;
+        decorate([UserRepo::class, 'getUsers'])
+            ->with(function($callable) {
+                return function($params) use ($callable) {
 
-                return app()->call($callable, [$params]);
-            };
-        });
+                    $params[0] = true;
 
-        decorateWith([UserRepo::class, 'getUsers'], function($callable) {
-            return function($params) use ($callable) {
+                    return app()->call($callable, [$params]);
+                };
+            })
+            ->with(function($callable) {
+                return function($params) use ($callable) {
 
-                if(is_string($params)) {
-                    $params = explode(',', $params);
-                }
+                    if(is_string($params)) {
+                        $params = explode(',', $params);
+                    }
 
-                return app()->call($callable, [$params]);
-            };
-        });
+                    return app()->call($callable, [$params]);
+                };
+            });
 
-        $users = decorate([UserRepo::class, 'getUsers'], ['1,2']);
+        $users = decorateIt([UserRepo::class, 'getUsers'], ['1,2']);
 
         dd($users);
     }

@@ -2,17 +2,30 @@
 
 namespace Mehradsadeghi\Decorator;
 
+use InvalidArgumentException;
+
 class Decorator {
 
     private static $decorations = [];
+    private static $currentCallable;
 
-    public function decorateWith($callable, $decorator)
+    public function register($callable)
     {
         $callable = $this->normalizeCallable($callable);
-        self::$decorations[$callable][] = $decorator;
+
+        self::$decorations[$callable] = [];
+        self::$currentCallable = $callable;
+
+        return $this;
     }
 
-    public function decorate($callable, array $params = [])
+    public function with($decorator)
+    {
+        self::$decorations[self::$currentCallable][] = $decorator;
+        return $this;
+    }
+
+    public function decorateIt($callable, array $params = [])
     {
         $callable = $this->normalizeCallable($callable);
 
@@ -20,24 +33,35 @@ class Decorator {
             return app()->call($callable, $params);
         }
 
-        foreach($decorators as $decorator) {
-            $callable = app()->call($decorator, [$callable]);
-        }
+        $callable = $this->getFinalCallable($decorators, $callable);
 
         return app()->call($callable, $params);
     }
 
-    public function getDecorations($callable)
+    private function getDecorations($callable)
     {
         return self::$decorations[$callable] ?? null;
     }
 
     private function normalizeCallable($callable)
     {
-        if (!is_array($callable)) {
-            throw new InvalidArgumentException('callable is invalid');
-        }
+        $this->validateCallable($callable);
 
         return join('@', $callable);
+    }
+
+    private function getFinalCallable($decorators, $callable)
+    {
+        foreach ($decorators as $decorator) {
+            $callable = app()->call($decorator, [$callable]);
+        }
+        return $callable;
+    }
+
+    private function validateCallable($callable)
+    {
+        if (!is_array($callable)) {
+            throw new InvalidArgumentException('callable should be an array of class and method.');
+        }
     }
 }
