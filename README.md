@@ -82,6 +82,6 @@ decorator([Person::class, 'makeFullName'])->set([PersonDecorator::class, 'decora
 Now we've assigned our decorator to the `makeFullName` method. Calling `makeFullName` with `decorate` helper function will apply its decoration:
 
 ```php
-decorate([Person::class, 'makeFullName'], ['mehrad', 'sadeghi']); //
+decorate([Person::class, 'makeFullName'], ['mehrad', 'sadeghi']); 
 
 ```
