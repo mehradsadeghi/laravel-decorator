@@ -85,5 +85,3 @@ Now we've assigned our decorator to the `makeFullName` method. Calling `makeFull
 decorate([Person::class, 'makeFullName'], ['mehrad', 'sadeghi']); //
 
 ```
-
-// multiple decorations
