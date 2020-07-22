@@ -2,7 +2,7 @@
 
 namespace Mehradsadeghi\DecoratorTest\Fakes;
 
-class UserRepo {
+class FakeUserRepo {
 
     function getUsers($ids)
     {
