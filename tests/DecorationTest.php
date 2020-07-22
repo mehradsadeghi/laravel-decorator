@@ -2,7 +2,6 @@
 
 namespace Mehradsadeghi\DecoratorTest;
 
-use Closure;
 use InvalidArgumentException;
 use Mehradsadeghi\DecoratorTest\Decorators\ArticleRepoDecorator;
 use Mehradsadeghi\DecoratorTest\Decorators\UserRepoDecorator;
