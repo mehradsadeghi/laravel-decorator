@@ -14,7 +14,7 @@ class Decorator {
 
     public function register($callable)
     {
-        $callable = $this->normalizeCallable($callable);
+        $callable = $this->stringifyCallable($callable);
 
         self::$decorations[$callable] ?? [];
         self::$currentCallable = $callable;
@@ -22,18 +22,20 @@ class Decorator {
         return $this;
     }
 
-    public function with($decorator)
+    public function set($decorator)
     {
         $this->validateCallable($decorator, 'Decorator');
+
+        $decorator = $this->getClosure($decorator);
 
         self::$decorations[self::$currentCallable][] = $decorator;
 
         return $this;
     }
 
-    public function decorateIt($callable, array $params = [])
+    public function decorate($callable, array $params = [])
     {
-        $callable = $this->normalizeCallable($callable);
+        $callable = $this->stringifyCallable($callable);
 
         if(is_null($decorators = $this->getDecorations($callable))) {
             return app()->call($callable, $params);
@@ -42,11 +44,6 @@ class Decorator {
         $callable = $this->performDecorations($decorators, $callable);
 
         return app()->call($callable, $params);
-    }
-
-    public function forget()
-    {
-
     }
 
     public function flush() {
@@ -62,21 +59,10 @@ class Decorator {
 
     private function getDecorations($callable)
     {
-        if(!self::$decorations[$callable]) {
-            return null;
-        }
-
-        foreach(self::$decorations[$callable] as $key => $decoration) {
-
-            if(!$decoration instanceof Closure) {
-                self::$decorations[$callable][$key] = join('@', $decoration);
-            }
-        }
-
-        return self::$decorations[$callable];
+        return self::$decorations[$callable] ?? null;
     }
 
-    private function normalizeCallable($callable)
+    private function stringifyCallable($callable)
     {
         $this->validateCallable($callable);
 
@@ -88,6 +74,7 @@ class Decorator {
         foreach ($decorators as $decorator) {
             $callable = app()->call($decorator, [$callable]);
         }
+
         return $callable;
     }
 
@@ -96,5 +83,16 @@ class Decorator {
         if (!is_callable($callable)) {
             throw new InvalidArgumentException(sprintf(self::INVALID_ARGUMENT_EXCEPTION, $message ?? 'Callable', 'PHP callables'));
         }
+    }
+
+    private function getClosure($decorator)
+    {
+        if (!$decorator instanceof Closure) {
+            $decorator = function ($callable) use ($decorator) {
+                [$class, $method] = $decorator;
+                return app($class)->{$method}($callable);
+            };
+        }
+        return $decorator;
     }
 }

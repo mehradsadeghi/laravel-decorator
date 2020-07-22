@@ -8,7 +8,7 @@ if (!function_exists('decorator')) {
         $decorator = app(Decorator::class);
 
         if (!is_null($callable)) {
-            $decorator->setCurrentCallable($callable);
+            $decorator->register($callable);
         }
 
         return $decorator;
@@ -16,15 +16,8 @@ if (!function_exists('decorator')) {
 }
 
 if (!function_exists('decorate')) {
-    function decorate($callable)
+    function decorate($callable, $params)
     {
-        return app(Decorator::class)->register($callable);
-    }
-}
-
-if (!function_exists('decorateIt')) {
-    function decorateIt($callable, $params)
-    {
-        return app(Decorator::class)->decorateIt($callable, $params);
+        return app(Decorator::class)->decorate($callable, $params);
     }
 }

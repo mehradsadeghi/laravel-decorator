@@ -2,6 +2,7 @@
 
 namespace Mehradsadeghi\DecoratorTest;
 
+use Closure;
 use InvalidArgumentException;
 use Mehradsadeghi\DecoratorTest\Decorators\ArticleRepoDecorator;
 use Mehradsadeghi\DecoratorTest\Decorators\UserRepoDecorator;
@@ -13,15 +14,14 @@ class DecorationTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-
         decorator()->flush();
     }
 
     /** @test */
     public function input_of_an_existing_method_can_be_decorated_by_one_decorator()
     {
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with(function($callable) {
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set(function($callable) {
                 return function($params) use ($callable) {
 
                     if(is_string($params)) {
@@ -32,14 +32,14 @@ class DecorationTest extends TestCase
                 };
             });
 
-        $users = decorateIt([FakeUserRepo::class, 'getUsers'], ['1,2']);
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
 
         $this->assertEquals([1, 2], $users);
 
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with([UserRepoDecorator::class, 'decorateParams']);
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set([UserRepoDecorator::class, 'decorateParams']);
 
-        $users = decorateIt([FakeUserRepo::class, 'getUsers'], ['1,2,3']);
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2,3']);
 
         $this->assertEquals([1, 2, 3], $users);
     }
@@ -47,8 +47,8 @@ class DecorationTest extends TestCase
     /** @test */
     public function input_of_an_existing_method_can_be_decorated_by_two_different_decorators()
     {
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with(function($callable) {
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set(function($callable) {
                 return function($params) use ($callable) {
 
                     if(is_string($params)) {
@@ -58,9 +58,9 @@ class DecorationTest extends TestCase
                     return app()->call($callable, [$params]);
                 };
             })
-            ->with([UserRepoDecorator::class, 'changeToBoolean']);
+            ->set([UserRepoDecorator::class, 'changeToBoolean']);
 
-        $users = decorateIt([FakeUserRepo::class, 'getUsers'], ['1,2']);
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
 
         $this->assertEquals([true, 2], $users);
     }
@@ -70,20 +70,20 @@ class DecorationTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with('UserRepoDecorator@changeToBoolean');
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set('UserRepoDecorator@changeToBoolean');
     }
 
     /** @test */
     public function separate_assigned_decorators_on_a_callable_wont_get_replaced()
     {
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with([UserRepoDecorator::class, 'decorateParams']);
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set([UserRepoDecorator::class, 'decorateParams']);
 
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with([UserRepoDecorator::class, 'changeToBoolean']);
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set([UserRepoDecorator::class, 'changeToBoolean']);
 
-        $users = decorateIt([FakeUserRepo::class, 'getUsers'], ['1,2']);
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
 
         $this->assertEquals([true, 2], $users);
     }
@@ -91,14 +91,14 @@ class DecorationTest extends TestCase
     /** @test */
     public function two_separated_methods_can_get_decorated_by_different_decorators()
     {
-        decorate([FakeUserRepo::class, 'getUsers'])
-            ->with([UserRepoDecorator::class, 'decorateParams']);
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set([UserRepoDecorator::class, 'decorateParams']);
 
-        decorate([FakeArticleRepo::class, 'getArticles'])
-            ->with([ArticleRepoDecorator::class, 'decorateParams']);
+        decorator([FakeArticleRepo::class, 'getArticles'])
+            ->set([ArticleRepoDecorator::class, 'decorateParams']);
 
-        $users = decorateIt([FakeUserRepo::class, 'getUsers'], ['1,2']);
-        $articles = decorateIt([FakeArticleRepo::class, 'getArticles'], ['5,6']);
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
+        $articles = decorate([FakeArticleRepo::class, 'getArticles'], ['5,6']);
 
         $this->assertEquals([1, 2], $users);
         $this->assertEquals([5, 6], $articles);
