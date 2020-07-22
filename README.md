@@ -64,7 +64,7 @@ class PersonDecorator {
                 $param = strtoupper($param);
             }
 
-            // real call to add method
+            // real call to makeFullName method
             $output = app()->call($callable, [$params]);
 
             // decorating the output
