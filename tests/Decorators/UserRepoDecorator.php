@@ -20,7 +20,7 @@ class UserRepoDecorator {
     {
         return function($params) use ($callable) {
 
-            $params[0] = true;
+            $params[0] = 'x';
 
             return app()->call($callable, [$params]);
         };

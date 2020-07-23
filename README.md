@@ -103,3 +103,64 @@ decorator([Person::class, 'makeFullName'])
     ->set([PersonDecorator::class, 'secondDecorator'])
     ->set([PersonDecorator::class, 'firstDecorator']);
 ```
+
+#### Forgetting (Removing) Decorator(s)
+You can easily remove one or all decorators assigned to a callable. From example above, Assume we have two decorators:
+
+```php
+class PersonDecorator {
+
+    public function decorateInput($callable)
+    {
+        return function (...$params) use ($callable) {
+
+            // decorating the inputs
+            foreach($params as $key => $param) {
+                $params[$key] = trim($param);
+            }
+
+            // real call to makeFullName method
+            $output = app()->call($callable, $params);
+
+            return $output;
+        };
+    }
+
+    public function decorateOutput($callable)
+    {
+        return function (...$params) use ($callable) {
+
+            // real call to makeFullName method
+            $output = app()->call($callable, $params);
+
+            // decorating the output
+            $output = strtoupper($output);
+
+            return $output;
+        };
+    }
+}
+
+decorator([Person::class, 'makeFullName'])
+    ->set([PersonDecorator::class, 'decorateInput'])
+    ->set([PersonDecorator::class, 'decorateOutput']);
+```
+The output of calling `decorate` would be:  
+
+```php
+decorate([Person::class, 'makeFullName'], ['  mehrad ', '     sadeghi ']); // MEHRAD SADEGHI
+```
+Then for removing `decorateOutput`:
+
+```php
+decorator([Person::class, 'makeFullName'])
+    ->forget([PersonDecorator::class, 'decorateOutput']);
+```
+And the output of calling `decorate` would be:  
+```php
+decorate([Person::class, 'makeFullName'], ['  mehrad ', '     sadeghi ']); // mehrad sadeghi
+```
+**Note** that for removing all decorations of a callable, just leave the `forget` parameter empty:
+```php
+decorator([Person::class, 'makeFullName'])->forget();
+```

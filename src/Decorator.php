@@ -4,6 +4,7 @@ namespace Mehradsadeghi\Decorator;
 
 use Closure;
 use InvalidArgumentException;
+use ReflectionFunction;
 
 class Decorator {
 
@@ -44,6 +45,18 @@ class Decorator {
         $callable = $this->performDecorations($decorators, $callable);
 
         return app()->call($callable, $params);
+    }
+
+    public function forget($decorator = null)
+    {
+        if(is_null($decorator)) {
+            // forget all decorations for current callable
+            self::$decorations[self::$currentCallable] = [];
+        } else {
+            $this->forgetOne($decorator);
+        }
+
+        return $this;
     }
 
     public function flush() {
@@ -88,5 +101,18 @@ class Decorator {
             };
         }
         return $decorator;
+    }
+
+    private function forgetOne($decorator)
+    {
+        foreach (self::$decorations[self::$currentCallable] as $key => $decoration) {
+
+            $callable = app(ReflectionFunction::class, ['name' => $decoration])->getStaticVariables()['decorator'];
+
+            if ($this->stringifyCallable($callable) == $this->stringifyCallable($decorator)) {
+                unset(self::$decorations[self::$currentCallable][$key]);
+                break;
+            }
+        }
     }
 }

@@ -61,7 +61,7 @@ class DecorationTest extends TestCase
 
         $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
 
-        $this->assertEquals([true, 2], $users);
+        $this->assertEquals(['x', 2], $users);
     }
 
     /** @test */
@@ -77,14 +77,14 @@ class DecorationTest extends TestCase
     public function separate_assigned_decorators_on_a_callable_wont_get_replaced()
     {
         decorator([FakeUserRepo::class, 'getUsers'])
-            ->set([UserRepoDecorator::class, 'decorateParams']);
+            ->set([UserRepoDecorator::class, 'changeToBoolean']);
 
         decorator([FakeUserRepo::class, 'getUsers'])
-            ->set([UserRepoDecorator::class, 'changeToBoolean']);
+            ->set([UserRepoDecorator::class, 'decorateParams']);
 
         $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
 
-        $this->assertEquals([true, 2], $users);
+        $this->assertEquals(['x', 2], $users);
     }
     
     /** @test */
@@ -101,5 +101,42 @@ class DecorationTest extends TestCase
 
         $this->assertEquals([1, 2], $users);
         $this->assertEquals([5, 6], $articles);
+    }
+
+    /** @test */
+    public function a_decoration_of_a_callable_can_be_forgotten()
+    {
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set([UserRepoDecorator::class, 'changeToBoolean'])
+            ->set([UserRepoDecorator::class, 'decorateParams']);
+
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
+
+        $this->assertEquals(['x', 2], $users);
+
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->forget([UserRepoDecorator::class, 'changeToBoolean']);
+
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
+
+        $this->assertEquals([1, 2], $users);
+    }
+
+    /** @test */
+    public function all_decorations_of_a_callable_can_be_forgotten()
+    {
+        decorator([FakeUserRepo::class, 'getUsers'])
+            ->set([UserRepoDecorator::class, 'changeToBoolean'])
+            ->set([UserRepoDecorator::class, 'decorateParams']);
+
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
+
+        $this->assertEquals(['x', 2], $users);
+
+        decorator([FakeUserRepo::class, 'getUsers'])->forget();
+
+        $users = decorate([FakeUserRepo::class, 'getUsers'], ['1,2']);
+
+        $this->assertEquals('1,2', $users);
     }
 }
