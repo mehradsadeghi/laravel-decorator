@@ -30,18 +30,18 @@ In order to decorate `makeFullName` method:
  
 ```php
 $decorator = function ($callable) {
-    return function ($params) use ($callable) {
-        
+    return function (...$params) use ($callable) {
+    
         // decorating the inputs
-        foreach($params as $param) {
-            $param = strtoupper($param);
+        foreach($params as $key => $param) {
+            $params[$key] = trim($param);
         }
 
         // real call to makeFullName method
-        $output = app()->call($callable, [$params]);
+        $output = app()->call($callable, $params);
 
         // decorating the output
-        $output = trim($output);
+        $output = strtoupper($output);
 
         return $output;
     };
@@ -50,25 +50,25 @@ $decorator = function ($callable) {
 decorator([Person::class, 'makeFullName'])->set($decorator);
 
 ```
-**Note** that the `decorator` should be a valid PHP callable. So it can be a `Closure` or an array callable, Which can be defined as follow:
+**Note** that the `decorator` should be a valid PHP callable. So it can be a `Closure` or an array callable, Which can be defined as follows:
 
 ```php
 class PersonDecorator {
 
     public function decorateFullName($callable)
     {
-        return function ($params) use ($callable) {
-            
+        return function (...$params) use ($callable) {
+        
             // decorating the inputs
-            foreach($params as $param) {
-                $param = strtoupper($param);
+            foreach($params as $key => $param) {
+                $params[$key] = trim($param);
             }
 
             // real call to makeFullName method
-            $output = app()->call($callable, [$params]);
+            $output = app()->call($callable, $params);
 
             // decorating the output
-            $output = trim($output);
+            $output = strtoupper($output);
 
             return $output;
         };
@@ -82,6 +82,24 @@ decorator([Person::class, 'makeFullName'])->set([PersonDecorator::class, 'decora
 Now we've assigned our decorator to the `makeFullName` method. Calling `makeFullName` with `decorate` helper function will apply its decoration:
 
 ```php
-decorate([Person::class, 'makeFullName'], ['mehrad', 'sadeghi']); 
+decorate([Person::class, 'makeFullName'], ['  mehrad ', '     sadeghi ']); // MEHRAD SADEGHI
 
+```
+#### Multiple Decorators
+You can easily set multiple decorators on a method:
+
+```php
+decorator([Person::class, 'makeFullName'])
+        ->set(function($callable) {
+            // decoration
+        })
+        ->set(function($callable) {
+            // decoration
+        });
+```
+or
+```php
+decorator([Person::class, 'makeFullName'])
+    ->set([PersonDecorator::class, 'secondDecorator'])
+    ->set([PersonDecorator::class, 'firstDecorator']);
 ```
