@@ -51,12 +51,6 @@ class Decorator {
         self::$currentCallable = null;
     }
 
-    public function setCurrentCallable($callable)
-    {
-        $this->validateCallable($callable);
-        self::$currentCallable = $callable;
-    }
-
     private function getDecorations($callable)
     {
         return self::$decorations[$callable] ?? null;
